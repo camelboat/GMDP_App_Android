@@ -4,6 +4,6 @@ Android application written by Python, packaged by python-for-android with build
 
 Debug by:
 
-'''bash
+```bash
 buildozer android debug deploy run logcat
-'''
+```
