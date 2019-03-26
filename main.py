@@ -107,27 +107,35 @@ NavigationLayout:
             id: scr_mngr
             Screen:
                 name: 'light'
-                MDRaisedButton:
-                    text: "On"
-                    size_hint: None, None
-                    size: 4 * dp(48), dp(48)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.75}
-                    opposite_colors: True
-                    on_release: app.show_example_snackbar('on')
-                MDRaisedButton:
-                    text: "Off"
-                    size_hint: None, None
-                    size: 4 * dp(48), dp(48)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                    opposite_colors: True
-                    on_release: app.show_example_snackbar('off')
-                MDSwitch:
-                    size_hint:    None, None
-                    size:        dp(36), dp(48)
-                    pos_hint:    {'center_x': 0.75, 'center_y': 0.5}
-                    _active:      True
-                    on_active: app.show_example_snackbar('on')
-                    on_release: app.show_example_snackbar('off')
+                ScrollView:
+                    do_scroll_x: False
+                    MDList:
+                        id: ml
+                        OneLineAvatarIconListItem:
+                            text: "Light #1"
+                            AvatarSampleWidget:
+                                source: './assets/light_bulb.png'
+                            MDSwitch:
+                                size_hint:    None, None
+                                size:        dp(36), dp(48)
+                                pos_hint:    {'center_x': 0.95, 'center_y': 0.5}
+                                _active:      True
+                                on_active: app.show_example_snackbar('switch')
+                                
+                # MDRaisedButton:
+                #     text: "On"
+                #     size_hint: None, None
+                #     size: 4 * dp(48), dp(48)
+                #     pos_hint: {'center_x': 0.5, 'center_y': 0.75}
+                #     opposite_colors: True
+                #     on_release: app.show_example_snackbar('on')
+                # MDRaisedButton:
+                #     text: "Off"
+                #     size_hint: None, None
+                #     size: 4 * dp(48), dp(48)
+                #     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                #     opposite_colors: True
+                #     on_release: app.show_example_snackbar('off')
             Screen:
                 name: 'get_temperature'
                 MDCard:
@@ -328,15 +336,22 @@ class KitchenSink(App):
 
     Room_1_Temp = ObjectProperty()
     Room_1_Current_Setting = ObjectProperty()
+    Room_1_Light = ObjectProperty()
 
-    Room_2_Temp = ObjectProperty
+    Room_2_Temp = ObjectProperty()
     Room_2_Current_Setting = ObjectProperty()
+    Room_2_Light = ObjectProperty()
 
     def build(self):
         main_widget = Builder.load_string(main_widget_kv)
         # self.theme_cls.theme_style = 'Dark'
-        self.get_temperature()
+        self.var_init()
         return main_widget
+
+    def var_init(self):
+        self.get_temperature()
+        self.Room_1_Light = 0
+        self.Room_2_Light = 0
 
     def get_temperature(self):
         r = requests.get(baseURL_Channel_get)
@@ -346,11 +361,18 @@ class KitchenSink(App):
 
     def show_example_snackbar(self, snack_type):
         if snack_type == 'on':
-            post_command(1, 1)
+            post_command("001", 1)
             Snackbar(text="Turn on successfully!").show()
         elif snack_type == 'off':
-            post_command(0, 1)
-            Snackbar(text= "Turn off successfully!").show()
+            post_command("000", 1)
+            Snackbar(text="Turn off successfully!").show()
+        elif snack_type == 'switch':
+            self.Room_1_Light = 1 - self.Room_1_Light
+            post_command("00"+str(self.Room_1_Light), 1)
+            if self.Room_1_Light == 0:
+                Snackbar(text="Turn off successfully!").show()
+            elif self.Room_1_Light == 1:
+                Snackbar(text="Turn on successfully!").show()
 
     def increase_temperature(self):
         self.Room_1_Current_Setting += 1
