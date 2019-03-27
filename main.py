@@ -25,7 +25,6 @@ from kivymd.time_picker import MDTimePicker
 from jnius import autoclass
 
 #from android.runnable import run_on_ui_thread
-
 #WebView = autoclass('android.webkit.WebView')
 #WebViewClient = autoclass('android.webkit.WebViewClient')
 #activity = autoclass('org.renpy.android.PythonActivity').mActivity
@@ -36,6 +35,8 @@ import webbrowser
 
 baseURL = 'https://api.thingspeak.com/talkbacks/31641/commands'
 baseURL_Channel_get = 'https://api.thingspeak.com/channels/723513/feeds.json?api_key=1M45KUAM480PFZWX&results=2'
+baseURL_temperature_setting_room1_get = 'https://api.thingspeak.com/channels/741927/feeds.json?api_key=QZQ9FM7V1MM215R0&results=2'
+baseURL_temperature_setting_room1_update = 'https://api.thingspeak.com/update?api_key=LWV7LOPF9QN79QG4&field1=0'
 
 
 main_widget_kv = '''
@@ -81,18 +82,22 @@ NavigationLayout:
         NavigationDrawerToolbar:
             title: "CHOOSE YOUR FUNCTION"
         NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
+            icon: 'lightbulb'
             text: "Lighting System"
             on_release: app.root.ids.scr_mngr.current = 'light'
         NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
+            icon: 'temperature-celsius'
             text: "Temperature"
             on_release: app.root.ids.scr_mngr.current = 'get_temperature'
-            #on_release: app.get_temperature()
+        NavigationDrawerIconButton:
+            icon: 'nature-people'
+            text: "Room Occupation"
+            on_release: app.root.ids.scr_mngr.current = 'room_occupation'
         NavigationDrawerIconButton:
             icon: 'checkbox-blank-circle'
             text: "Account Setting"
             on_release: app.root.ids.scr_mngr.current = 'account_setting'
+        
     BoxLayout:
         orientation: 'vertical'
         Toolbar:
@@ -118,24 +123,10 @@ NavigationLayout:
                             MDSwitch:
                                 size_hint:    None, None
                                 size:        dp(36), dp(48)
-                                pos_hint:    {'center_x': 0.95, 'center_y': 0.5}
+                                pos_hint:    {'center_x': 0.92, 'center_y': 0.5}
                                 _active:      True
                                 on_active: app.show_example_snackbar('switch')
-                                
-                # MDRaisedButton:
-                #     text: "On"
-                #     size_hint: None, None
-                #     size: 4 * dp(48), dp(48)
-                #     pos_hint: {'center_x': 0.5, 'center_y': 0.75}
-                #     opposite_colors: True
-                #     on_release: app.show_example_snackbar('on')
-                # MDRaisedButton:
-                #     text: "Off"
-                #     size_hint: None, None
-                #     size: 4 * dp(48), dp(48)
-                #     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                #     opposite_colors: True
-                #     on_release: app.show_example_snackbar('off')
+
             Screen:
                 name: 'get_temperature'
                 MDCard:
@@ -146,7 +137,7 @@ NavigationLayout:
                         orientation:'vertical'
                         padding: dp(8)
                         MDLabel:
-                            text: 'Current Temperature'
+                            text: 'Current Temperature ('+u'\N{DEGREE SIGN}'+'C)'
                             theme_text_color: 'Secondary'
                             font_style:"Body1"
                             size_hint_y: None
@@ -156,11 +147,34 @@ NavigationLayout:
                         MDSeparator:
                             height: dp(1)
                         MDLabel:
-                            text: str(app.Room_1_Temp)+u'\N{DEGREE SIGN}'
+                            text: str(app.Room_1_Temp)
                             theme_text_color: 'Secondary'
                             font_style:"Title"
                             halign: 'center'
                             font_size: '20pt'
+                # MDCard:
+                #     size_hint: 0.45, 0.3
+                #     #size: dp(360), dp(100)
+                #     pos_hint: {'center_x': 0.75, 'center_y': 0.8}
+                #     BoxLayout:
+                #         orientation:'vertical'
+                #         padding: dp(8)
+                #         MDLabel:
+                #             text: 'People Number Condition'
+                #             theme_text_color: 'Secondary'
+                #             font_style:"Body1"
+                #             size_hint_y: None
+                #             height: dp(36)
+                #             halign: 'center'
+                #             font_size: '6pt'
+                #         MDSeparator:
+                #             height: dp(1)
+                #         MDLabel:
+                #             text: 'Not available now'
+                #             theme_text_color: 'Secondary'
+                #             font_style:"Title"
+                #             halign: 'center'
+                #             font_size: '10pt'
                 MDCard:
                     size_hint: 0.45, 0.3
                     #size: dp(360), dp(100)
@@ -169,7 +183,7 @@ NavigationLayout:
                         orientation:'vertical'
                         padding: dp(8)
                         MDLabel:
-                            text: 'People Number Condition'
+                            text: 'Current Air-conditioner Temperature Setting ('+u'\N{DEGREE SIGN}'+'C)'
                             theme_text_color: 'Secondary'
                             font_style:"Body1"
                             size_hint_y: None
@@ -179,30 +193,7 @@ NavigationLayout:
                         MDSeparator:
                             height: dp(1)
                         MDLabel:
-                            text: 'Not available now'
-                            theme_text_color: 'Secondary'
-                            font_style:"Title"
-                            halign: 'center'
-                            font_size: '10pt'
-                MDCard:
-                    size_hint: 0.45, 0.3
-                    #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.25, 'center_y': 0.45}
-                    BoxLayout:
-                        orientation:'vertical'
-                        padding: dp(8)
-                        MDLabel:
-                            text: 'Current Air-conditioner Temperature Setting'
-                            theme_text_color: 'Secondary'
-                            font_style:"Body1"
-                            size_hint_y: None
-                            height: dp(36)
-                            halign: 'center'
-                            font_size: '6pt'
-                        MDSeparator:
-                            height: dp(1)
-                        MDLabel:
-                            text: str(app.Room_1_Current_Setting)+u'\N{DEGREE SIGN}'
+                            text: str(app.Room_1_Current_Setting)
                             theme_text_color: 'Secondary'
                             font_style:"Title"
                             halign: 'center'
@@ -221,23 +212,72 @@ NavigationLayout:
                     size_hint: 0.95, 0.1
                     pos_hint: {'center_x': 0.5, 'center_y': 0.075}
                     on_release: app.get_temperature_plot()
-                MDRaisedButton:
-                    text: "+"
-                    elevation_normal: 2
+                MDFloatingActionButton:
+                    id: float_act_btn
+                    icon: 'plus'
                     opposite_colors: True
-                    size_hint: 0.45, 0.1
-                    pos_hint: {'center_x': 0.75, 'center_y': 0.55}
-                    font_size: '20pt'
+                    elevation_normal: 8
+                    size: dp(80), dp(80)                    
+                    pos_hint: {'center_x': 0.25, 'center_y': 0.45}
                     on_release: app.increase_temperature()
-                MDRaisedButton:
-                    text: "-"
-                    elevation_normal: 2
+                MDFloatingActionButton:
+                    id: float_act_btn
+                    icon: 'minus'
                     opposite_colors: True
-                    size_hint: 0.45, 0.1
-                    pos_hint: {'center_x': 0.75, 'center_y': 0.35}
-                    font_size: '20pt'
+                    elevation_normal: 8
+                    size: dp(80), dp(80)
+                    pos_hint: {'center_x': 0.75, 'center_y': 0.45}
                     on_release: app.decrease_temperature()
-                    
+                MDFloatingActionButton:
+                    id: float_act_btn
+                    icon: 'power'
+                    opposite_colors: True
+                    elevation_normal: 8
+                    size: dp(80), dp(80)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+                    on_release: app.on_off_room1_ac()
+                # MDRaisedButton:
+                #     text: "+"
+                #     font_style: 'Title'
+                #     elevation_normal: 2
+                #     opposite_colors: True
+                #     size_hint: 0.45, 0.1
+                #     pos_hint: {'center_x': 0.75, 'center_y': 0.55}
+                #     # font_size: '100pt'
+                #     on_release: app.increase_temperature()
+                # MDRaisedButton:
+                #     text: "-"
+                #     elevation_normal: 2
+                #     opposite_colors: True
+                #     size_hint: 0.45, 0.1
+                #     pos_hint: {'center_x': 0.75, 'center_y': 0.35}
+                #     font_size: '100pt'
+                #     on_release: app.decrease_temperature()
+            Screen:
+                name: 'room_occupation'
+                MDCard:
+                    size_hint: 0.95, 0.3
+                    #size: dp(360), dp(100)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+                    BoxLayout:
+                        orientation:'vertical'
+                        padding: dp(8)
+                        MDLabel:
+                            text: 'People Number Condition'
+                            theme_text_color: 'Secondary'
+                            font_style:"Body1"
+                            size_hint_y: None
+                            height: dp(36)
+                            halign: 'center'
+                            font_size: '6pt'
+                        MDSeparator:
+                            height: dp(1)
+                        MDLabel:
+                            text: 'Not available now'
+                            theme_text_color: 'Secondary'
+                            font_style:"Title"
+                            halign: 'center'
+                            font_size: '10pt'              
             Screen:
                 name: 'account_setting'
                 ScrollView:
@@ -337,10 +377,14 @@ class KitchenSink(App):
     Room_1_Temp = ObjectProperty()
     Room_1_Current_Setting = ObjectProperty()
     Room_1_Light = ObjectProperty()
+    Room_1_AC_Status = ObjectProperty()
 
     Room_2_Temp = ObjectProperty()
     Room_2_Current_Setting = ObjectProperty()
     Room_2_Light = ObjectProperty()
+    Room_2_AC_Status = ObjectProperty()
+
+    User_1_Configuration = ObjectProperty()
 
     def build(self):
         main_widget = Builder.load_string(main_widget_kv)
@@ -350,14 +394,32 @@ class KitchenSink(App):
 
     def var_init(self):
         self.get_temperature()
+        # self.get_temperature_setting_room1()
         self.Room_1_Light = 0
         self.Room_2_Light = 0
+        self.Room_1_AC_Status = 0
+        self.Room_2_AC_Status = 0
+        self.Room_1_Current_Setting = "Off"
+        # self.read_user1_configuration()
+
+    def read_user1_configuration(self):
+        with open('data/user_1.json', 'r') as read_file:
+            self.User_1_Configuration = json.load(read_file)
+            self.Room_1_Current_Setting = self.User_1_Configuration['room1']['current_temperature_setting']
+
+    def write_user1_configuration(self):
+        with open('data/user_1.json', 'w') as write_file:
+            json.dump(self.User_1_Configuration, write_file)
 
     def get_temperature(self):
         r = requests.get(baseURL_Channel_get)
         data = json.loads(r.text)
-        self.Room_1_Temp = data['feeds'][0]['field1'][1:]
-        self.Room_1_Current_Setting = 0
+        self.Room_1_Temp = data['feeds'][1]['field1'][1:]
+
+    def get_temperature_setting_room1(self):
+        r = requests.get(baseURL_temperature_setting_room1_get)
+        data = json.loads(r.text)
+        self.Room_1_Current_Setting = int(data['feeds'][1]['field1'][1:])
 
     def show_example_snackbar(self, snack_type):
         if snack_type == 'on':
@@ -374,16 +436,37 @@ class KitchenSink(App):
             elif self.Room_1_Light == 1:
                 Snackbar(text="Turn on successfully!").show()
 
+    def on_off_room1_ac(self):
+        self.Room_1_AC_Status = 1-self.Room_1_AC_Status
+        if self.Room_1_AC_Status == 0:
+            self.Room_1_Current_Setting = 'Off'
+            post_command('1000', 1)
+            self.write_user1_configuration()
+        elif self.Room_1_AC_Status == 1:
+            self.read_user1_configuration()
+            post_command('1010', 1)
+            post_command('11' + str(self.User_1_Configuration['room1']['current_temperature_setting']), 1)
+            self.read_user1_configuration()
+
     def increase_temperature(self):
-        self.Room_1_Current_Setting += 1
+        if self.Room_1_Current_Setting != "Off":
+            self.Room_1_Current_Setting += 1
+            self.User_1_Configuration['room1']['current_temperature_setting'] += 1
+            self.write_user1_configuration()
+            post_command('11' + str(self.User_1_Configuration['room1']['current_temperature_setting']), 1)
 
     def decrease_temperature(self):
-        self.Room_1_Current_Setting -= 1
+        if self.Room_1_Current_Setting != "Off":
+            self.Room_1_Current_Setting -= 1
+            self.User_1_Configuration['room1']['current_temperature_setting'] -= 1
+            self.write_user1_configuration()
+            post_command('11' + str(self.User_1_Configuration['room1']['current_temperature_setting']), 1)
 
     def get_temperature_plot(self):
-        webbrowser.open(
-           'https://thingspeak.com/channels/723513/charts/\
-           1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=200&type=line&update=15')
+        webbrowser.open('https://thingspeak.com/channels' +
+                        '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
+                        '&dynamic=true&results=200&type=line&update=15'
+        )
 
     def set_error_message(self, *args):
         if len(self.root.ids.text_field_error.text) == 2:

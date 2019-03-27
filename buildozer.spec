@@ -54,7 +54,7 @@ presplash.filename = ./assets/preslash_center_light.png
 icon.filename = ./assets/icon_light.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
-orientation = all
+orientation = portrait
 
 # (list) List of service to declare
 #services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
