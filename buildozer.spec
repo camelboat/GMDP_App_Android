@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title = GMDP Android
+title = GMDP Control
 
 # (str) Package name
 package.name = myapp
@@ -52,6 +52,7 @@ presplash.filename = ./assets/preslash_center_light.png
 
 # (str) Icon of the application
 icon.filename = ./assets/icon_light.png
+#icon.filename = ./assets/icon_grey.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait

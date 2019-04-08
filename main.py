@@ -37,7 +37,8 @@ baseURL = 'https://api.thingspeak.com/talkbacks/31641/commands'
 baseURL_Channel_get = 'https://api.thingspeak.com/channels/723513/feeds.json?api_key=1M45KUAM480PFZWX&results=2'
 baseURL_temperature_setting_room1_get = 'https://api.thingspeak.com/channels/741927/feeds.json?api_key=QZQ9FM7V1MM215R0&results=2'
 baseURL_temperature_setting_room1_update = 'https://api.thingspeak.com/update?api_key=LWV7LOPF9QN79QG4&field1=0'
-
+baseURL_energy_running_get = 'https://api.thingspeak.com/channels/751981/fields/3.json?api_key=G17BAT3422YXJ5JH&results=10'
+baseURL_energy_off_get = 'https://api.thingspeak.com/channels/751981/fields/4.json?api_key=G17BAT3422YXJ5JH&results=10'
 
 main_widget_kv = '''
 #:import Toolbar kivymd.toolbar.Toolbar
@@ -94,6 +95,10 @@ NavigationLayout:
             text: "Room Occupation"
             on_release: app.root.ids.scr_mngr.current = 'room_occupation'
         NavigationDrawerIconButton:
+            icon: 'power-plug'
+            text: "Energy Saving"
+            on_release: app.root.ids.scr_mngr.current = 'energy_saving'    
+        NavigationDrawerIconButton:
             icon: 'checkbox-blank-circle'
             text: "Account Setting"
             on_release: app.root.ids.scr_mngr.current = 'account_setting'
@@ -141,7 +146,7 @@ NavigationLayout:
                             theme_text_color: 'Secondary'
                             font_style:"Body1"
                             size_hint_y: None
-                            height: dp(36)
+                            height: dp(50)
                             halign: 'center'
                             font_size: '6pt'
                         MDSeparator:
@@ -187,7 +192,7 @@ NavigationLayout:
                             theme_text_color: 'Secondary'
                             font_style:"Body1"
                             size_hint_y: None
-                            height: dp(36)
+                            height: dp(50)
                             halign: 'center'
                             font_size: '6pt'
                         MDSeparator:
@@ -277,7 +282,62 @@ NavigationLayout:
                             theme_text_color: 'Secondary'
                             font_style:"Title"
                             halign: 'center'
-                            font_size: '10pt'              
+                            font_size: '10pt'
+            Screen:
+                name: 'energy_saving'
+                MDCard:
+                    size_hint: 0.95, 0.3
+                    #size: dp(360), dp(100)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+                    BoxLayout:
+                        orientation:'vertical'
+                        padding: dp(8)
+                        MDLabel:
+                            text: 'Light Running Time Today in Room1 (min)'
+                            theme_text_color: 'Secondary'
+                            font_style:"Body1"
+                            size_hint_y: None
+                            height: dp(36)
+                            halign: 'center'
+                            font_size: '6pt'
+                        MDSeparator:
+                            height: dp(1)
+                        MDLabel:
+                            text: str(app.Room_1_Running_Time)
+                            theme_text_color: 'Secondary'
+                            font_style:"Title"
+                            halign: 'center'
+                            font_size: '50pt' 
+                MDCard:
+                    size_hint: 0.95, 0.3
+                    #size: dp(360), dp(100)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+                    BoxLayout:
+                        orientation:'vertical'
+                        padding: dp(8)
+                        MDLabel:
+                            text: 'Energy Saving Today in Room1 (Wh)'
+                            theme_text_color: 'Secondary'
+                            font_style:"Body1"
+                            size_hint_y: None
+                            height: dp(36)
+                            halign: 'center'
+                            font_size: '6pt'
+                        MDSeparator:
+                            height: dp(1)
+                        MDLabel:
+                            text: str(app.Room_1_Energy_Saving)
+                            theme_text_color: 'Secondary'
+                            font_style:"Title"
+                            halign: 'center'
+                            font_size: '50pt' 
+                MDRaisedButton:
+                    text: "Get Latest Energy Saving Info"
+                    elevation_normal: 2
+                    opposite_colors: True
+                    size_hint: 0.95, 0.1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+                    on_release: app.get_energy_info()                                        
             Screen:
                 name: 'account_setting'
                 ScrollView:
@@ -344,7 +404,6 @@ NavigationLayout:
                             IconRightSampleWidget:
 '''
 
-
 def post_command(command_string, position):
     instruction = {'api_key': 'NU6M3B6JB1Q3IR76', 'command_string': command_string, 'position': position}
     print("Uploading...")
@@ -378,11 +437,15 @@ class KitchenSink(App):
     Room_1_Current_Setting = ObjectProperty()
     Room_1_Light = ObjectProperty()
     Room_1_AC_Status = ObjectProperty()
+    Room_1_Running_Time = ObjectProperty()
+    Room_1_Energy_Saving = ObjectProperty()
 
     Room_2_Temp = ObjectProperty()
     Room_2_Current_Setting = ObjectProperty()
     Room_2_Light = ObjectProperty()
     Room_2_AC_Status = ObjectProperty()
+    Room_2_Running_Time = ObjectProperty()
+    Room_2_Energy_Saving = ObjectProperty()
 
     User_1_Configuration = ObjectProperty()
 
@@ -394,6 +457,7 @@ class KitchenSink(App):
 
     def var_init(self):
         self.get_temperature()
+        self.get_energy_info()
         # self.get_temperature_setting_room1()
         self.Room_1_Light = 0
         self.Room_2_Light = 0
@@ -414,7 +478,26 @@ class KitchenSink(App):
     def get_temperature(self):
         r = requests.get(baseURL_Channel_get)
         data = json.loads(r.text)
-        self.Room_1_Temp = data['feeds'][1]['field1'][1:]
+        self.Room_1_Temp = data['feeds'][1]['field1'][1:len(data)-5]
+
+    def read_valid_data(self, data, field):
+        i = 0
+        latest_valid_data = data['feeds'][i][field]
+        while i < 10:
+            while data['feeds'][i][field] is None:
+                i += 1
+            latest_valid_data = data['feeds'][i][field]
+            print('latest valid data is: ' + str(latest_valid_data))
+            break
+        return float(latest_valid_data)
+
+    def get_energy_info(self):
+        r = requests.get(baseURL_energy_running_get)
+        data = json.loads(r.text)
+        self.Room_1_Running_Time = round(self.read_valid_data(data, 'field3') / 60, 1)
+        r = requests.get(baseURL_energy_off_get)
+        data = json.loads(r.text)
+        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 0.05 / 3600, 2)
 
     def get_temperature_setting_room1(self):
         r = requests.get(baseURL_temperature_setting_room1_get)
@@ -462,7 +545,8 @@ class KitchenSink(App):
             self.write_user1_configuration()
             post_command('11' + str(self.User_1_Configuration['room1']['current_temperature_setting']), 1)
 
-    def get_temperature_plot(self):
+    @staticmethod
+    def get_temperature_plot():
         webbrowser.open('https://thingspeak.com/channels' +
                         '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
                         '&dynamic=true&results=200&type=line&update=15'
@@ -495,4 +579,3 @@ class IconRightSampleWidget(IRightBodyTouch, MDCheckbox):
 
 if __name__ == '__main__':
     KitchenSink().run()
-
