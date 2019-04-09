@@ -9,3 +9,4 @@ $ buildozer android debug deploy run logcat
 ```
 
 More detailed information would be added later.
+
