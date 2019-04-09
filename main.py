@@ -23,6 +23,12 @@ from kivymd.theming import ThemeManager
 from kivymd.time_picker import MDTimePicker
 
 from jnius import autoclass
+from os.path import join, dirname, realpath
+
+from plyer import notification
+from plyer.utils import platform
+from plyer.compat import PY2
+from plyer import vibrator
 
 #from android.runnable import run_on_ui_thread
 #WebView = autoclass('android.webkit.WebView')
@@ -37,372 +43,9 @@ baseURL = 'https://api.thingspeak.com/talkbacks/31641/commands'
 baseURL_Channel_get = 'https://api.thingspeak.com/channels/723513/feeds.json?api_key=1M45KUAM480PFZWX&results=2'
 baseURL_temperature_setting_room1_get = 'https://api.thingspeak.com/channels/741927/feeds.json?api_key=QZQ9FM7V1MM215R0&results=2'
 baseURL_temperature_setting_room1_update = 'https://api.thingspeak.com/update?api_key=LWV7LOPF9QN79QG4&field1=0'
-baseURL_energy_running_get = 'https://api.thingspeak.com/channels/751981/fields/3.json?api_key=G17BAT3422YXJ5JH&results=10'
-baseURL_energy_off_get = 'https://api.thingspeak.com/channels/751981/fields/4.json?api_key=G17BAT3422YXJ5JH&results=10'
-
-main_widget_kv = '''
-#:import Toolbar kivymd.toolbar.Toolbar
-#:import ThemeManager kivymd.theming.ThemeManager
-#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
-#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
-#:import NavigationDrawerDivider kivymd.navigationdrawer.NavigationDrawerDivider
-#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
-#:import NavigationDrawerSubheader kivymd.navigationdrawer.NavigationDrawerSubheader
-#:import MDCheckbox kivymd.selectioncontrols.MDCheckbox
-#:import MDSwitch kivymd.selectioncontrols.MDSwitch
-#:import MDList kivymd.list.MDList
-#:import OneLineListItem kivymd.list.OneLineListItem
-#:import TwoLineListItem kivymd.list.TwoLineListItem
-#:import ThreeLineListItem kivymd.list.ThreeLineListItem
-#:import OneLineAvatarListItem kivymd.list.OneLineAvatarListItem
-#:import OneLineIconListItem kivymd.list.OneLineIconListItem
-#:import OneLineAvatarIconListItem kivymd.list.OneLineAvatarIconListItem
-#:import MDTextField kivymd.textfields.MDTextField
-#:import MDSpinner kivymd.spinner.MDSpinner
-#:import MDCard kivymd.card.MDCard
-#:import MDSeparator kivymd.card.MDSeparator
-#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
-#:import get_color_from_hex kivy.utils.get_color_from_hex
-#:import colors kivymd.color_definitions.colors
-#:import SmartTile kivymd.grid.SmartTile
-#:import MDSlider kivymd.slider.MDSlider
-#:import MDTabbedPanel kivymd.tabs.MDTabbedPanel
-#:import MDTab kivymd.tabs.MDTab
-#:import MDProgressBar kivymd.progressbar.MDProgressBar
-#:import MDAccordion kivymd.accordion.MDAccordion
-#:import MDAccordionItem kivymd.accordion.MDAccordionItem
-#:import MDAccordionSubItem kivymd.accordion.MDAccordionSubItem
-#:import MDThemePicker kivymd.theme_picker.MDThemePicker
-#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
-#:import MDBottomNavigationItem kivymd.tabs.MDBottomNavigationItem
-
-NavigationLayout:
-    id: nav_layout
-    MDNavigationDrawer:
-        id: nav_drawer
-        NavigationDrawerToolbar:
-            title: "CHOOSE YOUR FUNCTION"
-        NavigationDrawerIconButton:
-            icon: 'lightbulb'
-            text: "Lighting System"
-            on_release: app.root.ids.scr_mngr.current = 'light'
-        NavigationDrawerIconButton:
-            icon: 'temperature-celsius'
-            text: "Temperature"
-            on_release: app.root.ids.scr_mngr.current = 'get_temperature'
-        NavigationDrawerIconButton:
-            icon: 'nature-people'
-            text: "Room Occupation"
-            on_release: app.root.ids.scr_mngr.current = 'room_occupation'
-        NavigationDrawerIconButton:
-            icon: 'power-plug'
-            text: "Energy Saving"
-            on_release: app.root.ids.scr_mngr.current = 'energy_saving'    
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "Account Setting"
-            on_release: app.root.ids.scr_mngr.current = 'account_setting'
-        
-    BoxLayout:
-        orientation: 'vertical'
-        Toolbar:
-            id: toolbar
-            title: 'GMDP Team2 Smart Room'
-            md_bg_color: app.theme_cls.primary_color
-            background_palette: 'Primary'
-            background_hue: '500'
-            left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
-            right_action_items: [['dots-vertical', lambda x: app.root.toggle_nav_drawer()]]
-        ScreenManager:
-            id: scr_mngr
-            Screen:
-                name: 'light'
-                ScrollView:
-                    do_scroll_x: False
-                    MDList:
-                        id: ml
-                        OneLineAvatarIconListItem:
-                            text: "Light #1"
-                            AvatarSampleWidget:
-                                source: './assets/light_bulb.png'
-                            MDSwitch:
-                                size_hint:    None, None
-                                size:        dp(36), dp(48)
-                                pos_hint:    {'center_x': 0.92, 'center_y': 0.5}
-                                _active:      True
-                                on_active: app.show_example_snackbar('switch')
-
-            Screen:
-                name: 'get_temperature'
-                MDCard:
-                    size_hint: 0.45, 0.3
-                    #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.25, 'center_y': 0.8}
-                    BoxLayout:
-                        orientation:'vertical'
-                        padding: dp(8)
-                        MDLabel:
-                            text: 'Current Temperature ('+u'\N{DEGREE SIGN}'+'C)'
-                            theme_text_color: 'Secondary'
-                            font_style:"Body1"
-                            size_hint_y: None
-                            height: dp(50)
-                            halign: 'center'
-                            font_size: '6pt'
-                        MDSeparator:
-                            height: dp(1)
-                        MDLabel:
-                            text: str(app.Room_1_Temp)
-                            theme_text_color: 'Secondary'
-                            font_style:"Title"
-                            halign: 'center'
-                            font_size: '20pt'
-                # MDCard:
-                #     size_hint: 0.45, 0.3
-                #     #size: dp(360), dp(100)
-                #     pos_hint: {'center_x': 0.75, 'center_y': 0.8}
-                #     BoxLayout:
-                #         orientation:'vertical'
-                #         padding: dp(8)
-                #         MDLabel:
-                #             text: 'People Number Condition'
-                #             theme_text_color: 'Secondary'
-                #             font_style:"Body1"
-                #             size_hint_y: None
-                #             height: dp(36)
-                #             halign: 'center'
-                #             font_size: '6pt'
-                #         MDSeparator:
-                #             height: dp(1)
-                #         MDLabel:
-                #             text: 'Not available now'
-                #             theme_text_color: 'Secondary'
-                #             font_style:"Title"
-                #             halign: 'center'
-                #             font_size: '10pt'
-                MDCard:
-                    size_hint: 0.45, 0.3
-                    #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.75, 'center_y': 0.8}
-                    BoxLayout:
-                        orientation:'vertical'
-                        padding: dp(8)
-                        MDLabel:
-                            text: 'Current Air-conditioner Temperature Setting ('+u'\N{DEGREE SIGN}'+'C)'
-                            theme_text_color: 'Secondary'
-                            font_style:"Body1"
-                            size_hint_y: None
-                            height: dp(50)
-                            halign: 'center'
-                            font_size: '6pt'
-                        MDSeparator:
-                            height: dp(1)
-                        MDLabel:
-                            text: str(app.Room_1_Current_Setting)
-                            theme_text_color: 'Secondary'
-                            font_style:"Title"
-                            halign: 'center'
-                            font_size: '20pt'
-                MDRaisedButton:
-                    text: "Get Latest Room Condition Info"
-                    elevation_normal: 2
-                    opposite_colors: True
-                    size_hint: 0.95, 0.1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.2}
-                    on_release: app.get_temperature()
-                MDRaisedButton:
-                    text: "Check Plot for Temperature on ThingSpeak"
-                    elevation_normal: 2
-                    opposite_colors: True
-                    size_hint: 0.95, 0.1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.075}
-                    on_release: app.get_temperature_plot()
-                MDFloatingActionButton:
-                    id: float_act_btn
-                    icon: 'plus'
-                    opposite_colors: True
-                    elevation_normal: 8
-                    size: dp(80), dp(80)                    
-                    pos_hint: {'center_x': 0.25, 'center_y': 0.45}
-                    on_release: app.increase_temperature()
-                MDFloatingActionButton:
-                    id: float_act_btn
-                    icon: 'minus'
-                    opposite_colors: True
-                    elevation_normal: 8
-                    size: dp(80), dp(80)
-                    pos_hint: {'center_x': 0.75, 'center_y': 0.45}
-                    on_release: app.decrease_temperature()
-                MDFloatingActionButton:
-                    id: float_act_btn
-                    icon: 'power'
-                    opposite_colors: True
-                    elevation_normal: 8
-                    size: dp(80), dp(80)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.45}
-                    on_release: app.on_off_room1_ac()
-                # MDRaisedButton:
-                #     text: "+"
-                #     font_style: 'Title'
-                #     elevation_normal: 2
-                #     opposite_colors: True
-                #     size_hint: 0.45, 0.1
-                #     pos_hint: {'center_x': 0.75, 'center_y': 0.55}
-                #     # font_size: '100pt'
-                #     on_release: app.increase_temperature()
-                # MDRaisedButton:
-                #     text: "-"
-                #     elevation_normal: 2
-                #     opposite_colors: True
-                #     size_hint: 0.45, 0.1
-                #     pos_hint: {'center_x': 0.75, 'center_y': 0.35}
-                #     font_size: '100pt'
-                #     on_release: app.decrease_temperature()
-            Screen:
-                name: 'room_occupation'
-                MDCard:
-                    size_hint: 0.95, 0.3
-                    #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.8}
-                    BoxLayout:
-                        orientation:'vertical'
-                        padding: dp(8)
-                        MDLabel:
-                            text: 'People Number Condition'
-                            theme_text_color: 'Secondary'
-                            font_style:"Body1"
-                            size_hint_y: None
-                            height: dp(36)
-                            halign: 'center'
-                            font_size: '6pt'
-                        MDSeparator:
-                            height: dp(1)
-                        MDLabel:
-                            text: 'Not available now'
-                            theme_text_color: 'Secondary'
-                            font_style:"Title"
-                            halign: 'center'
-                            font_size: '10pt'
-            Screen:
-                name: 'energy_saving'
-                MDCard:
-                    size_hint: 0.95, 0.3
-                    #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.8}
-                    BoxLayout:
-                        orientation:'vertical'
-                        padding: dp(8)
-                        MDLabel:
-                            text: 'Light Running Time Today in Room1 (min)'
-                            theme_text_color: 'Secondary'
-                            font_style:"Body1"
-                            size_hint_y: None
-                            height: dp(36)
-                            halign: 'center'
-                            font_size: '6pt'
-                        MDSeparator:
-                            height: dp(1)
-                        MDLabel:
-                            text: str(app.Room_1_Running_Time)
-                            theme_text_color: 'Secondary'
-                            font_style:"Title"
-                            halign: 'center'
-                            font_size: '50pt' 
-                MDCard:
-                    size_hint: 0.95, 0.3
-                    #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.45}
-                    BoxLayout:
-                        orientation:'vertical'
-                        padding: dp(8)
-                        MDLabel:
-                            text: 'Energy Saving Today in Room1 (Wh)'
-                            theme_text_color: 'Secondary'
-                            font_style:"Body1"
-                            size_hint_y: None
-                            height: dp(36)
-                            halign: 'center'
-                            font_size: '6pt'
-                        MDSeparator:
-                            height: dp(1)
-                        MDLabel:
-                            text: str(app.Room_1_Energy_Saving)
-                            theme_text_color: 'Secondary'
-                            font_style:"Title"
-                            halign: 'center'
-                            font_size: '50pt' 
-                MDRaisedButton:
-                    text: "Get Latest Energy Saving Info"
-                    elevation_normal: 2
-                    opposite_colors: True
-                    size_hint: 0.95, 0.1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
-                    on_release: app.get_energy_info()                                        
-            Screen:
-                name: 'account_setting'
-                ScrollView:
-                    do_scroll_x: False
-                    MDList:
-                        id: ml
-                        OneLineListItem:
-                            text: "One-line item"
-                        TwoLineListItem:
-                            text: "Two-line item"
-                            secondary_text: "Secondary text here"
-                        ThreeLineListItem:
-                            text: "Three-line item"
-                            secondary_text: "This is a multi-line label where you can fit more text than usual"
-                        OneLineAvatarListItem:
-                            text: "Single-line item with avatar"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                        TwoLineAvatarListItem:
-                            type: "two-line"
-                            text: "Two-line item..."
-                            secondary_text: "with avatar"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                        ThreeLineAvatarListItem:
-                            type: "three-line"
-                            text: "Three-line item..."
-                            secondary_text: "...with avatar..." + '\\n' + "and third line!"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                        OneLineIconListItem:
-                            text: "Single-line item with left icon"
-                            IconLeftSampleWidget:
-                                id: li_icon_1
-                                icon: 'star-circle'
-                        TwoLineIconListItem:
-                            text: "Two-line item..."
-                            secondary_text: "...with left icon"
-                            IconLeftSampleWidget:
-                                id: li_icon_2
-                                icon: 'comment-text'
-                        ThreeLineIconListItem:
-                            text: "Three-line item..."
-                            secondary_text: "...with left icon..." + '\\n' + "and third line!"
-                            IconLeftSampleWidget:
-                                id: li_icon_3
-                                icon: 'sd'
-                        OneLineAvatarIconListItem:
-                            text: "Single-line + avatar&icon"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                            IconRightSampleWidget:
-                        TwoLineAvatarIconListItem:
-                            text: "Two-line item..."
-                            secondary_text: "...with avatar&icon"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                            IconRightSampleWidget:
-                        ThreeLineAvatarIconListItem:
-                            text: "Three-line item..."
-                            secondary_text: "...with avatar&icon..." + '\\n' + "and third line!"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                            IconRightSampleWidget:
-'''
+baseURL_energy_running_get = 'https://api.thingspeak.com/channels/751981/fields/3.json?api_key=G17BAT3422YXJ5JH&results=20'
+baseURL_energy_off_get = 'https://api.thingspeak.com/channels/751981/fields/4.json?api_key=G17BAT3422YXJ5JH&results=20'
+baseURL_energy = 'https://api.thingspeak.com/channels/751981/feeds.json?api_key=G17BAT3422YXJ5JH&results=50'
 
 def post_command(command_string, position):
     instruction = {'api_key': 'NU6M3B6JB1Q3IR76', 'command_string': command_string, 'position': position}
@@ -450,7 +93,7 @@ class KitchenSink(App):
     User_1_Configuration = ObjectProperty()
 
     def build(self):
-        main_widget = Builder.load_string(main_widget_kv)
+        main_widget = Builder.load_file('main.kv')
         # self.theme_cls.theme_style = 'Dark'
         self.var_init()
         return main_widget
@@ -483,41 +126,33 @@ class KitchenSink(App):
     def read_valid_data(self, data, field):
         i = 0
         latest_valid_data = data['feeds'][i][field]
-        while i < 10:
+        while i < 49:
             while data['feeds'][i][field] is None:
                 i += 1
+                print(i)
             latest_valid_data = data['feeds'][i][field]
             print('latest valid data is: ' + str(latest_valid_data))
             break
         return float(latest_valid_data)
 
     def get_energy_info(self):
-        r = requests.get(baseURL_energy_running_get)
+        r = requests.get(baseURL_energy)
         data = json.loads(r.text)
         self.Room_1_Running_Time = round(self.read_valid_data(data, 'field3') / 60, 1)
-        r = requests.get(baseURL_energy_off_get)
-        data = json.loads(r.text)
-        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 0.05 / 3600, 2)
+        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 0.05 / 3600, 3)
 
     def get_temperature_setting_room1(self):
         r = requests.get(baseURL_temperature_setting_room1_get)
         data = json.loads(r.text)
         self.Room_1_Current_Setting = int(data['feeds'][1]['field1'][1:])
 
-    def show_example_snackbar(self, snack_type):
-        if snack_type == 'on':
-            post_command("001", 1)
-            Snackbar(text="Turn on successfully!").show()
-        elif snack_type == 'off':
-            post_command("000", 1)
-            Snackbar(text="Turn off successfully!").show()
-        elif snack_type == 'switch':
-            self.Room_1_Light = 1 - self.Room_1_Light
-            post_command("00"+str(self.Room_1_Light), 1)
-            if self.Room_1_Light == 0:
-                Snackbar(text="Turn off successfully!").show()
-            elif self.Room_1_Light == 1:
-                Snackbar(text="Turn on successfully!").show()
+    def switch_light(self):
+        self.Room_1_Light = 1 - self.Room_1_Light
+        post_command("00"+str(self.Room_1_Light), 1)
+        if self.Room_1_Light == 0:
+            self.do_notify('Turn off successfully!')
+        elif self.Room_1_Light == 1:
+            self.do_notify('Turn on successfully!')
 
     def on_off_room1_ac(self):
         self.Room_1_AC_Status = 1-self.Room_1_AC_Status
@@ -551,6 +186,15 @@ class KitchenSink(App):
                         '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
                         '&dynamic=true&results=200&type=line&update=15'
         )
+
+    @staticmethod
+    def do_notify(message):
+        notification.notify(message=message, toast=True)
+
+    # @staticmethod
+    # def do_vibrate(self, time):
+    #     print(vibrator.exists())
+    #     vibrator.vibrate(time=2)
 
     def set_error_message(self, *args):
         if len(self.root.ids.text_field_error.text) == 2:
