@@ -40,12 +40,13 @@ import json
 import webbrowser
 
 baseURL = 'https://api.thingspeak.com/talkbacks/31641/commands'
-baseURL_Channel_get = 'https://api.thingspeak.com/channels/723513/feeds.json?api_key=1M45KUAM480PFZWX&results=2'
+baseURL_Channel_get = 'https://api.thingspeak.com/channels/723513/feeds.json?api_key=1M45KUAM480PFZWX&results=50'
 baseURL_temperature_setting_room1_get = 'https://api.thingspeak.com/channels/741927/feeds.json?api_key=QZQ9FM7V1MM215R0&results=2'
 baseURL_temperature_setting_room1_update = 'https://api.thingspeak.com/update?api_key=LWV7LOPF9QN79QG4&field1=0'
 baseURL_energy_running_get = 'https://api.thingspeak.com/channels/751981/fields/3.json?api_key=G17BAT3422YXJ5JH&results=20'
 baseURL_energy_off_get = 'https://api.thingspeak.com/channels/751981/fields/4.json?api_key=G17BAT3422YXJ5JH&results=20'
 baseURL_energy = 'https://api.thingspeak.com/channels/751981/feeds.json?api_key=G17BAT3422YXJ5JH&results=50'
+
 
 def post_command(command_string, position):
     instruction = {'api_key': 'NU6M3B6JB1Q3IR76', 'command_string': command_string, 'position': position}
@@ -63,7 +64,6 @@ class HackedDemoNavDrawer(MDNavigationDrawer):
             if len(self._list.children) == 1:
                 widget._active = True
                 self.active_item = widget
-            # widget.bind(on_release=lambda x: self.panel.toggle_state())
             widget.bind(on_release=lambda x: x._set_active(True, list=self))
         elif issubclass(widget.__class__, NavigationDrawerHeaderBase):
             self._header_container.add_widget(widget)
@@ -121,19 +121,7 @@ class KitchenSink(App):
     def get_temperature(self):
         r = requests.get(baseURL_Channel_get)
         data = json.loads(r.text)
-        self.Room_1_Temp = data['feeds'][1]['field1'][1:len(data)-5]
-
-    def read_valid_data(self, data, field):
-        i = 0
-        latest_valid_data = data['feeds'][i][field]
-        while i < 49:
-            while data['feeds'][i][field] is None:
-                i += 1
-                print(i)
-            latest_valid_data = data['feeds'][i][field]
-            print('latest valid data is: ' + str(latest_valid_data))
-            break
-        return float(latest_valid_data)
+        self.Room_1_Temp = round(self.read_valid_data(data, 'field1'))
 
     def get_energy_info(self):
         r = requests.get(baseURL_energy)
@@ -188,11 +176,23 @@ class KitchenSink(App):
         )
 
     @staticmethod
+    def read_valid_data(data, field):
+        i = 49
+        latest_valid_data = data['feeds'][i][field]
+        while i >= 0:
+            while data['feeds'][i][field] is None:
+                i -= 1
+            latest_valid_data = data['feeds'][i][field]
+            print('latest valid data is: ' + str(latest_valid_data))
+            break
+        return float(latest_valid_data)
+
+    @staticmethod
     def do_notify(message):
         notification.notify(message=message, toast=True)
 
     # @staticmethod
-    # def do_vibrate(self, time):
+    # def do_vibrate(self, time): # not work on Android Q
     #     print(vibrator.exists())
     #     vibrator.vibrate(time=2)
 
