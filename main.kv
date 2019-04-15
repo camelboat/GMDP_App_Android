@@ -137,29 +137,6 @@ NavigationLayout:
                             font_style:"Title"
                             halign: 'center'
                             font_size: '20pt'
-                # MDCard:
-                #     size_hint: 0.45, 0.3
-                #     #size: dp(360), dp(100)
-                #     pos_hint: {'center_x': 0.75, 'center_y': 0.8}
-                #     BoxLayout:
-                #         orientation:'vertical'
-                #         padding: dp(8)
-                #         MDLabel:
-                #             text: 'People Number Condition'
-                #             theme_text_color: 'Secondary'
-                #             font_style:"Body1"
-                #             size_hint_y: None
-                #             height: dp(36)
-                #             halign: 'center'
-                #             font_size: '6pt'
-                #         MDSeparator:
-                #             height: dp(1)
-                #         MDLabel:
-                #             text: 'Not available now'
-                #             theme_text_color: 'Secondary'
-                #             font_style:"Title"
-                #             halign: 'center'
-                #             font_size: '10pt'
                 MDCard:
                     size_hint: 0.45, 0.3
                     #size: dp(360), dp(100)
@@ -241,28 +218,36 @@ NavigationLayout:
             Screen:
                 name: 'room_occupation'
                 MDCard:
-                    size_hint: 0.95, 0.3
+                    md_bg_color: app.Room_1_Occupancy_Color
+                    size_hint: 0.95, 0.6
                     #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.6}
                     BoxLayout:
                         orientation:'vertical'
                         padding: dp(8)
                         MDLabel:
-                            text: 'People Number Condition'
+                            text: 'Room Occupancy Condition'
                             theme_text_color: 'Secondary'
                             font_style:"Body1"
                             size_hint_y: None
-                            height: dp(36)
+                            height: dp(50)
                             halign: 'center'
-                            font_size: '6pt'
+                            font_size: '12pt'
                         MDSeparator:
                             height: dp(1)
                         MDLabel:
-                            text: 'Not available now'
+                            text: str(app.Room_1_Occupancy_Status)
                             theme_text_color: 'Secondary'
                             font_style:"Title"
                             halign: 'center'
-                            font_size: '10pt'
+                            font_size: '50pt'
+                MDRaisedButton:
+                    text: "Get Latest Energy Room Occupancy Infor"
+                    elevation_normal: 2
+                    opposite_colors: True
+                    size_hint: 0.95, 0.1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+                    on_release: app.get_occupancy_info()
             Screen:
                 name: 'energy_saving'
                 MDCard:
