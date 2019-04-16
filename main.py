@@ -163,7 +163,6 @@ class KitchenSink(App):
         else:
             self.Room_1_Occupancy_Status = -1
 
-
     def get_energy_info(self):
         r = requests.get(baseURL_energy)
         data = json.loads(r.text)
@@ -179,9 +178,17 @@ class KitchenSink(App):
         self.Room_1_Light = 1 - self.Room_1_Light
         post_command("00"+str(self.Room_1_Light), 1)
         if self.Room_1_Light == 0:
-            self.do_notify('Turn off successfully!')
+            self.do_notify('Turn off light #1 successfully!')
         elif self.Room_1_Light == 1:
-            self.do_notify('Turn on successfully!')
+            self.do_notify('Turn on light #1 successfully!')
+
+    def switch_light_2(self):
+        self.Room_2_Light = 1 - self.Room_2_Light
+        post_command("01"+str(self.Room_2_Light), 1)
+        if self.Room_2_Light == 0:
+            self.do_notify('Turn off light #2 successfully!')
+        elif self.Room_2_Light == 1:
+            self.do_notify('Turn on light #2 successfully!')
 
     def on_off_room1_ac(self):
         self.Room_1_AC_Status = 1-self.Room_1_AC_Status
@@ -211,9 +218,17 @@ class KitchenSink(App):
 
     @staticmethod
     def get_temperature_plot():
-        webbrowser.open('https://thingspeak.com/channels' +
-                        '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
-                        '&dynamic=true&results=200&type=line&update=15'
+        webbrowser.open(
+            'https://thingspeak.com/channels' +
+            '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
+            '&dynamic=true&results=200&type=line&update=15'
+        )
+
+    @staticmethod
+    def get_occupancy_plot():
+        webbrowser.open(
+            'https://thingspeak.com/channels/723513/charts/4?' +
+            'bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=200&type=line&update=15'
         )
 
     @staticmethod
