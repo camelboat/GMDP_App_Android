@@ -152,13 +152,13 @@ class KitchenSink(App):
             self.Room_1_Occupancy_Status = 'Many people are here'
             self.Room_1_Occupancy_Color = ORANGE
         elif 300 <= self.Room_1_PIR_Triggering_Times < 400:
-            self.Room_1_Occupancy_Status = 'The Room is Full !!!'
+            self.Room_1_Occupancy_Status = 'The Room is Full !'
             self.Room_1_Occupancy_Color = RED
         elif 400 <= self.Room_1_PIR_Triggering_Times < 500:
-            self.Room_1_Occupancy_Status = 'Someone is holding a rally here'
+            self.Room_1_Occupancy_Status = 'The Room is Full !!'
             self.Room_1_Occupancy_Color = BROWN
         elif self.Room_1_PIR_Triggering_Times >= 500:
-            self.Room_1_Occupancy_Status = 'Our sensor is broken???'
+            self.Room_1_Occupancy_Status = 'The Room is Full !!!'
             self.Room_1_Occupancy_Color = BROWN
         else:
             self.Room_1_Occupancy_Status = -1
@@ -167,7 +167,7 @@ class KitchenSink(App):
         r = requests.get(baseURL_energy)
         data = json.loads(r.text)
         self.Room_1_Running_Time = round(self.read_valid_data(data, 'field3') / 60, 1)
-        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 0.05 / 3600, 3)
+        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 50 / 3600, 3)
 
     def get_temperature_setting_room1(self):
         r = requests.get(baseURL_temperature_setting_room1_get)
