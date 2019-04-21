@@ -78,7 +78,7 @@ class HackedDemoNavDrawer(MDNavigationDrawer):
             super(MDNavigationDrawer, self).add_widget(widget, index)
 
 
-class KitchenSink(App):
+class GMDP_Control(App):
     theme_cls = ThemeManager()
     previous_date = ObjectProperty()
     title = "GMDP Team2 Smart Room"
@@ -278,4 +278,4 @@ class IconRightSampleWidget(IRightBodyTouch, MDCheckbox):
 
 
 if __name__ == '__main__':
-    KitchenSink().run()
+    GMDP_Control().run()
