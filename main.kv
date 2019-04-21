@@ -49,20 +49,12 @@ NavigationLayout:
             on_release: app.root.ids.scr_mngr.current = 'get_temperature'
         NavigationDrawerIconButton:
             icon: 'nature-people'
-            text: "Room Occupation"
+            text: "Room Occupancy"
             on_release: app.root.ids.scr_mngr.current = 'room_occupation'
         NavigationDrawerIconButton:
             icon: 'power-plug'
             text: "Energy Saving"
             on_release: app.root.ids.scr_mngr.current = 'energy_saving'
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "Account Setting"
-            on_release: app.root.ids.scr_mngr.current = 'account_setting'
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "Notification Test"
-            on_release: app.root.ids.scr_mngr.current = 'notification_test'
     BoxLayout:
         orientation: 'vertical'
         Toolbar:
@@ -100,17 +92,17 @@ NavigationLayout:
                                 size:        dp(36), dp(48)
                                 pos_hint:    {'center_x': 0.92, 'center_y': 0.5}
                                 _active:      True
-                                on_active: app.switch_light()
-                        OneLineAvatarIconListItem:
-                            text: "Light #3"
-                            AvatarSampleWidget:
-                                source: './assets/light_bulb.png'
-                            MDSwitch:
-                                size_hint:    None, None
-                                size:        dp(36), dp(48)
-                                pos_hint:    {'center_x': 0.92, 'center_y': 0.5}
-                                _active:      True
-                                on_active: app.switch_light()
+                                on_active: app.switch_light_2()
+#                        OneLineAvatarIconListItem:
+#                            text: "Light #3"
+#                            AvatarSampleWidget:
+#                                source: './assets/light_bulb.png'
+#                            MDSwitch:
+#                                size_hint:    None, None
+#                                size:        dp(36), dp(48)
+#                                pos_hint:    {'center_x': 0.92, 'center_y': 0.5}
+#                                _active:      True
+#                                on_active: app.switch_light()
 
             Screen:
                 name: 'get_temperature'
@@ -219,9 +211,9 @@ NavigationLayout:
                 name: 'room_occupation'
                 MDCard:
                     md_bg_color: app.Room_1_Occupancy_Color
-                    size_hint: 0.95, 0.6
+                    size_hint: 0.95, 0.7
                     #size: dp(360), dp(100)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.625}
                     BoxLayout:
                         orientation:'vertical'
                         padding: dp(8)
@@ -240,14 +232,21 @@ NavigationLayout:
                             theme_text_color: 'Secondary'
                             font_style:"Title"
                             halign: 'center'
-                            font_size: '50pt'
+                            font_size: '40pt'
                 MDRaisedButton:
-                    text: "Get Latest Energy Room Occupancy Infor"
+                    text: "Get Latest Energy Room Occupancy Info"
                     elevation_normal: 2
                     opposite_colors: True
                     size_hint: 0.95, 0.1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.2}
                     on_release: app.get_occupancy_info()
+                MDRaisedButton:
+                    text: "Check Plot for Room Occupancy on ThingSpeak"
+                    elevation_normal: 2
+                    opposite_colors: True
+                    size_hint: 0.95, 0.1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.075}
+                    on_release: app.get_occupancy_plot()
             Screen:
                 name: 'energy_saving'
                 MDCard:
@@ -303,76 +302,3 @@ NavigationLayout:
                     size_hint: 0.95, 0.1
                     pos_hint: {'center_x': 0.5, 'center_y': 0.1}
                     on_release: app.get_energy_info()
-            Screen:
-                name: 'notification_test'
-                MDRaisedButton:
-                    text: "Test Notification"
-                    elevation_normal: 2
-                    opposite_colors: True
-                    size_hint: 0.95, 0.1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
-                    on_release: app.do_notify('hi there!')
-            Screen:
-                name: 'account_setting'
-                ScrollView:
-                    do_scroll_x: False
-                    MDList:
-                        id: ml
-                        OneLineListItem:
-                            text: "One-line item"
-                        TwoLineListItem:
-                            text: "Two-line item"
-                            secondary_text: "Secondary text here"
-                        ThreeLineListItem:
-                            text: "Three-line item"
-                            secondary_text: "This is a multi-line label where you can fit more text than usual"
-                        OneLineAvatarListItem:
-                            text: "Single-line item with avatar"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                        TwoLineAvatarListItem:
-                            type: "two-line"
-                            text: "Two-line item..."
-                            secondary_text: "with avatar"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                        ThreeLineAvatarListItem:
-                            type: "three-line"
-                            text: "Three-line item..."
-                            secondary_text: "...with avatar..." + '\\n' + "and third line!"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                        OneLineIconListItem:
-                            text: "Single-line item with left icon"
-                            IconLeftSampleWidget:
-                                id: li_icon_1
-                                icon: 'star-circle'
-                        TwoLineIconListItem:
-                            text: "Two-line item..."
-                            secondary_text: "...with left icon"
-                            IconLeftSampleWidget:
-                                id: li_icon_2
-                                icon: 'comment-text'
-                        ThreeLineIconListItem:
-                            text: "Three-line item..."
-                            secondary_text: "...with left icon..." + '\\n' + "and third line!"
-                            IconLeftSampleWidget:
-                                id: li_icon_3
-                                icon: 'sd'
-                        OneLineAvatarIconListItem:
-                            text: "Single-line + avatar&icon"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                            IconRightSampleWidget:
-                        TwoLineAvatarIconListItem:
-                            text: "Two-line item..."
-                            secondary_text: "...with avatar&icon"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                            IconRightSampleWidget:
-                        ThreeLineAvatarIconListItem:
-                            text: "Three-line item..."
-                            secondary_text: "...with avatar&icon..." + '\\n' + "and third line!"
-                            AvatarSampleWidget:
-                                source: './assets/avatar.png'
-                            IconRightSampleWidget:

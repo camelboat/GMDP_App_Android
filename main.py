@@ -78,7 +78,7 @@ class HackedDemoNavDrawer(MDNavigationDrawer):
             super(MDNavigationDrawer, self).add_widget(widget, index)
 
 
-class KitchenSink(App):
+class GMDP_Control(App):
     theme_cls = ThemeManager()
     previous_date = ObjectProperty()
     title = "GMDP Team2 Smart Room"
@@ -152,23 +152,22 @@ class KitchenSink(App):
             self.Room_1_Occupancy_Status = 'Many people are here'
             self.Room_1_Occupancy_Color = ORANGE
         elif 300 <= self.Room_1_PIR_Triggering_Times < 400:
-            self.Room_1_Occupancy_Status = 'The Room is Full !!!'
+            self.Room_1_Occupancy_Status = 'The Room is Full !'
             self.Room_1_Occupancy_Color = RED
         elif 400 <= self.Room_1_PIR_Triggering_Times < 500:
-            self.Room_1_Occupancy_Status = 'Someone is holding a rally here'
+            self.Room_1_Occupancy_Status = 'The Room is Full !!'
             self.Room_1_Occupancy_Color = BROWN
         elif self.Room_1_PIR_Triggering_Times >= 500:
-            self.Room_1_Occupancy_Status = 'Our sensor is broken???'
+            self.Room_1_Occupancy_Status = 'The Room is Full !!!'
             self.Room_1_Occupancy_Color = BROWN
         else:
             self.Room_1_Occupancy_Status = -1
-
 
     def get_energy_info(self):
         r = requests.get(baseURL_energy)
         data = json.loads(r.text)
         self.Room_1_Running_Time = round(self.read_valid_data(data, 'field3') / 60, 1)
-        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 0.05 / 3600, 3)
+        self.Room_1_Energy_Saving = round(self.read_valid_data(data, 'field4') * 50 / 3600, 3)
 
     def get_temperature_setting_room1(self):
         r = requests.get(baseURL_temperature_setting_room1_get)
@@ -179,9 +178,17 @@ class KitchenSink(App):
         self.Room_1_Light = 1 - self.Room_1_Light
         post_command("00"+str(self.Room_1_Light), 1)
         if self.Room_1_Light == 0:
-            self.do_notify('Turn off successfully!')
+            self.do_notify('Turn off light #1 successfully!')
         elif self.Room_1_Light == 1:
-            self.do_notify('Turn on successfully!')
+            self.do_notify('Turn on light #1 successfully!')
+
+    def switch_light_2(self):
+        self.Room_2_Light = 1 - self.Room_2_Light
+        post_command("01"+str(self.Room_2_Light), 1)
+        if self.Room_2_Light == 0:
+            self.do_notify('Turn off light #2 successfully!')
+        elif self.Room_2_Light == 1:
+            self.do_notify('Turn on light #2 successfully!')
 
     def on_off_room1_ac(self):
         self.Room_1_AC_Status = 1-self.Room_1_AC_Status
@@ -211,9 +218,17 @@ class KitchenSink(App):
 
     @staticmethod
     def get_temperature_plot():
-        webbrowser.open('https://thingspeak.com/channels' +
-                        '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
-                        '&dynamic=true&results=200&type=line&update=15'
+        webbrowser.open(
+            'https://thingspeak.com/channels' +
+            '/723513/charts/1?bgcolor=%23ffffff&color=%23d62020' +
+            '&dynamic=true&results=200&type=line&update=15'
+        )
+
+    @staticmethod
+    def get_occupancy_plot():
+        webbrowser.open(
+            'https://thingspeak.com/channels/723513/charts/4?' +
+            'bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=200&type=line&update=15'
         )
 
     @staticmethod
@@ -263,4 +278,4 @@ class IconRightSampleWidget(IRightBodyTouch, MDCheckbox):
 
 
 if __name__ == '__main__':
-    KitchenSink().run()
+    GMDP_Control().run()
