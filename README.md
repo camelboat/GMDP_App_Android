@@ -13,8 +13,15 @@ Deploy on the phone and run by:
 $ buildozer deploy run logcat
 ```
 
+## Files
+`main.kv`: Layout file, where you can modify according to the example from kivymd.
+
+`main.py`: Application main file
+
+`buildozer.spec`: Building configuration file
+
+
 ## Function Introduction
-`main.kv` is the layout file, where you can modify according to the example from kivymd.
 
 Currently the application has four function pages, which are "Lighting System", "Temperature", "Room Occupancy", and "Energy Saving".
 
